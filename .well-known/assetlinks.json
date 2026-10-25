@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.cineclub",
+      "sha256_cert_fingerprints": [
+        "FC:8F:9B:95:F0:69:70:F9:7D:58:72:FD:DF:E0:59:1C:02:2F:2C:94:11:E9:92:0D:B9:B7:55:DA:EC:C0:BC:3A"
+      ]
+    }
+  }
+]
