@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Connexion Trakt · CineClub</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: #151515;
+      color: #f5f5f5;
+    }
+
+    body {
+      box-sizing: border-box;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+    }
+
+    main {
+      width: 100%;
+      max-width: 460px;
+      box-sizing: border-box;
+      padding: 32px;
+      border: 1px solid #383838;
+      border-radius: 16px;
+      background: #202020;
+      text-align: center;
+    }
+
+    .logo {
+      margin-bottom: 12px;
+      color: #e04444;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 1.5rem;
+    }
+
+    p {
+      color: #d0d0d0;
+      line-height: 1.6;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #c92f38;
+      color: white;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background: #e04444;
+    }
+
+    .help {
+      margin-top: 24px;
+      font-size: 0.875rem;
+      color: #aaa;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="logo">CineClub</div>
+
+    <section id="processing">
+      <h1>Retour de Trakt</h1>
+      <p>Traitement du retour d'authentification…</p>
+    </section>
+
+    <section id="success" hidden>
+      <h1>Autorisation reçue</h1>
+      <p>
+        Trakt a répondu. Tu peux revenir dans CineClub pour poursuivre
+        la connexion.
+      </p>
+      <a id="open-app" class="button" href="cineclub://trakt-callback">
+        Ouvrir CineClub
+      </a>
+      <p class="help">
+        Si l'application ne s'ouvre pas, lance CineClub manuellement.
+      </p>
+    </section>
+
+    <section id="cancelled" hidden>
+      <h1>Connexion interrompue</h1>
+      <p>
+        L'autorisation Trakt n'a pas abouti. Tu peux revenir dans
+        CineClub et réessayer.
+      </p>
+    </section>
+
+    <section id="invalid" hidden>
+      <h1>Retour incomplet</h1>
+      <p>
+        Aucun code d'autorisation n'a été reçu. Reviens dans CineClub
+        et recommence la connexion Trakt.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const state = params.get("state");
+      const error = params.get("error");
+
+      // Retirer les paramètres OAuth de la barre d'adresse et de
+      // l'entrée courante de l'historique avant toute redirection.
+      window.history.replaceState(
+        null,
+        document.title,
+        window.location.pathname
+      );
+
+      const show = (id) => {
+        document.getElementById("processing").hidden = true;
+        document.getElementById(id).hidden = false;
+      };
+
+      if (error) {
+        show("cancelled");
+        return;
+      }
+
+      if (!code || !state) {
+        show("invalid");
+        return;
+      }
+
+      // Le code et l'état sont transmis à l'application native.
+      // Le vérificateur PKCE reste dans CineClub et n'est jamais
+      // envoyé à cette page.
+      const callback = new URL("cineclub://trakt-callback");
+      callback.searchParams.set("code", code);
+      callback.searchParams.set("state", state);
+
+      const openApp = document.getElementById("open-app");
+      openApp.href = callback.toString();
+
+      show("success");
+
+      // Tenter l'ouverture de l'application. Le bouton reste disponible
+      // si le navigateur bloque l'ouverture automatique.
+      window.location.replace(callback.toString());
+    })();
+  </script>
+</body>
+</html>
