@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -152,10 +151,18 @@
         return;
       }
 
-      // Le code et l'état sont transmis à l'application native.
+      // Le préfixe permet de différencier le callback Windows Debug
+      // du callback Windows Release. Le state complet est conservé
+      // pour que CineClub puisse vérifier sa valeur exacte.
+      const isWindowsDebug = state.startsWith("win-debug.");
+      const callbackScheme = isWindowsDebug
+        ? "cineclub-debug"
+        : "cineclub";
+
+      // Le code et le state sont transmis à l'application native.
       // Le vérificateur PKCE reste dans CineClub et n'est jamais
       // envoyé à cette page.
-      const callback = new URL("cineclub://trakt-callback");
+      const callback = new URL(`${callbackScheme}://trakt-callback`);
       callback.searchParams.set("code", code);
       callback.searchParams.set("state", state);
 
